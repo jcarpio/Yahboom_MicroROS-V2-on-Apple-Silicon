@@ -330,7 +330,7 @@ The original icon graphics were preserved. The desktop wallpaper (a Yahboom JPG,
 
 ### 9.4 Other original Python environments
 
-Source-side folders/configuration mentioned a `python_env`, a `microros_v2_env` with application requirements, and a `yolo_env`. Not all of these original x86 virtual environments have been recreated or validated on ARM64. Specifically, **YOLO and every Yahboom AI demonstration are not yet proven working**. Avoid interpreting a successful desktop launch as an audit of all optional AI components.
+Source-side folders and configurations included a `python_env`, a `microros_v2_env` with application-specific requirements, and a `yolo_env`. Not all original x86 Python environments have been fully recreated or validated on ARM64. However, **YOLO object detection and tracking inference have been successfully tested on Apple Silicon using ONNX Runtime 1.23.2 and NumPy 1.26.4 in a dedicated ARM64 virtual environment (`~/yolo_arm64_env`)**. The original Yahboom AI models and resources have also been recovered. Nevertheless, **PyTorch-based `.pt` models, NVIDIA TensorRT `.engine` files, and the complete set of Yahboom AI demonstrations remain unvalidated**. Successful standalone inference tests do not guarantee full integration with ROS 2, camera pipelines, or physical robot hardware.
 
 ## 10. The MediaPipe ARM64 challenge
 
