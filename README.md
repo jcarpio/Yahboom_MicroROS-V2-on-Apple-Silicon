@@ -1,7 +1,6 @@
-# Yahboom ROSmaster ROS 2 Humble on Apple Silicon using UTM
+# Yahboom MicroROS V2 / ROSmaster — ROS 2 Humble on Apple Silicon with UTM
 
 **An engineering migration log, beginner-friendly setup guide, verification report, and current-image status**
-# Yahboom MicroROS V2 / ROSmaster — ROS 2 Humble on Apple Silicon with UTM
 
 **Ubuntu 22.04 ARM64 virtual machine · Robotics development · Native YOLO and MediaPipe · ESP32-S3 / micro-ROS**
 
