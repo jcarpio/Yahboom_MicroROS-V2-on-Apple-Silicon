@@ -916,6 +916,50 @@ As of **13 October 2026**, this is a **working ARM64 ROS 2 Humble educational de
 
 It is **not yet a validated turnkey replacement for every feature of the original x86 VMware image**, **not yet a tested real robot-control station**, **not yet validated with a real camera or LiDAR**, **not yet benchmarked**, and **not yet a license-audited VM image ready for redistribution**. MediaPipe's ARM64 wheel is experimental and needs private OpenCV native libraries plus a Protobuf workaround.
 
+## Latest Updates — October 2026
+
+Since the initial Apple Silicon migration, the development environment has gained several important capabilities:
+
+### ESP-IDF 5.1.2 and ESP32-S3 firmware development
+
+Espressif ESP-IDF **v5.1.2** and its native ARM64-hosted Xtensa toolchain have been installed successfully on Ubuntu 22.04.5 running under UTM on an Apple M4 Mac.
+
+The original Yahboom micro-ROS ESP-IDF component was restored and adapted for ARM64 compilation. After resolving Python dependencies, CMake configuration issues, host-versus-target architecture conflicts, and static-library linking errors, **all 65 micro-ROS source packages compiled successfully**.
+
+The `publisher` example produced a valid ESP32-S3 firmware image (`main.bin`, 823,168 bytes). The project was successfully rebuilt incrementally and independently from a clean build directory using the existing micro-ROS libraries.
+
+### Automated micro-ROS build tool
+
+A new utility, **`build-microros-s3.sh`**, simplifies ESP32-S3 firmware development by automatically adjusting the shared micro-ROS toolchain to the selected project, invoking ESP-IDF, and restoring the original configuration afterward.
+
+```bash
+bash ~/esp/tools/build-microros-s3.sh ~/esp/tests_arm64/publisher
+```
+
+The utility was tested successfully, including verification that the shared toolchain was restored without modification.
+
+Developers can use **Visual Studio Code, VS Code Remote-SSH, or another compatible editor on macOS** to create and edit ESP-IDF projects, while performing the actual ARM64-hosted cross-compilation inside the Ubuntu UTM guest.
+
+### Build reproducibility
+
+Two independent builds of the `publisher` firmware produced identical executable code and data in the four ELF sections examined: `.iram0.text`, `.flash.text`, `.flash.rodata`, and `.dram0.data`.
+
+The final firmware images differed by only **37 bytes**, consistent with build-time metadata, the ELF hash, and the ESP32 image checksum.
+
+### Additional restored resources
+
+The environment also includes restored Yahboom ESP-IDF examples, micro-ROS sample projects, original robot configuration utilities, and recovered AI model resources. ONNX Runtime CPU inference was successfully tested on ARM64 using selected YOLO and tracking models.
+
+### Documentation
+
+The repository now includes dedicated documentation covering the ESP32-S3 build tool, the ARM64 migration challenges, and workflows for creating new projects using macOS and Visual Studio Code.
+
+- [ESP32-S3 micro-ROS build tool](tools/build-microros-s3.sh)
+- [Build tool user guide](tools/README.txt)
+- [Apple Silicon micro-ROS technical annex](docs/APPLE_SILICON_MICROROS_BUILD_ANNEX.md)
+
+**Validation scope:** Firmware compilation and software-level reproducibility have been demonstrated. Flashing and executing the firmware on physical ESP32-S3 hardware, micro-ROS Agent communication, and complete robot operation remain to be verified.
+
 ### Bottom line
 
 **The architecture migration and a meaningful ROS 2–AI end-to-end software demonstration have succeeded.** The most important remaining work is *hardware validation, reproducibility on a fresh Mac/UTM installation, software packaging and responsible redistribution*. For a newcomer who wants to learn ROS 2 and work with Yahboom source on Apple Silicon, the present VM already provides a credible experimental starting point—provided the limitations above are clearly understood.
