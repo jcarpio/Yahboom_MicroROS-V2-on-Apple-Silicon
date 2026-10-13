@@ -1,10 +1,48 @@
 # Yahboom ROSmaster ROS 2 Humble on Apple Silicon using UTM
 
 **An engineering migration log, beginner-friendly setup guide, verification report, and current-image status**
+# Yahboom MicroROS V2 / ROSmaster — ROS 2 Humble on Apple Silicon with UTM
 
-> **Project status (13 October 2026): functional experimental ARM64 development image.** The Apple Silicon VM runs Ubuntu 22.04 ARM64, ROS 2 Humble, reconstructed Yahboom desktop launchers, navigation/mapping user interfaces, micro-ROS components, and an experimentally built MediaPipe 0.10.21 ARM64 package. Four MediaPipe CPU inference smoke tests passed. The **original Yahboom `hand_detector_node` successfully received synthetic ROS 2 images and displayed the processed output**. Physical robot operation, real-camera recognition, mapping accuracy, and autonomous navigation are **not yet validated**.
+**Ubuntu 22.04 ARM64 virtual machine · Robotics development · Native YOLO and MediaPipe · ESP32-S3 / micro-ROS**
+
+> **Release status — 13 October 2026:** A functional, experimental Ubuntu 22.04 ARM64 environment has been assembled and tested on an Apple Silicon M4 Mac using UTM. A compressed UTM export (~25 GB ZIP) is being uploaded to Hugging Face; **download availability and independent re-import testing have not yet been confirmed**.
 >
-> **Independent community documentation.** Not affiliated with or endorsed by Yahboom, Canonical, ROS/Open Robotics, Apple, UTM, VMware, Google, or the MediaPipe team.
+> **Community project:** This is an independent adaptation, not an official Yahboom release and not endorsed by Apple, Canonical, UTM, ROS/Open Robotics, Google, Ultralytics, or other software vendors.
+
+## Download the UTM virtual machine
+
+**Hugging Face dataset:** [Yahboom MicroROS V2 — Ubuntu 22.04 ARM64 — UTM](https://huggingface.co/datasets/enkire/Yahboom-MicroROS-V2-Ubuntu-22.04-ARM64-UTM)
+
+When the upload is complete, download the exported VM archive, verify its checksum when published, extract it, and import/open the `.utm` package in [UTM](https://mac.getutm.app/) on an Apple Silicon Mac. The guest is **ARM64/aarch64**, not an x86_64 VMware image running unchanged. The tested guest username is `yahboom`; the distributor should document first-login credentials and recommend changing passwords and machine-specific keys before network use.
+
+**Requirements:** Apple Silicon Mac, UTM, enough disk space to extract and operate a VM with a 64 GiB virtual disk, and sufficient RAM for Ubuntu, ROS 2 applications, and optional Docker services. Performance and interoperability can vary by Mac and UTM version.
+
+## What is included and verified
+
+| Component | Status / evidence |
+| --- | --- |
+| Ubuntu 22.04 ARM64 + ROS 2 Humble | Bootable development environment; `rclpy` import and Yahboom packages verified |
+| Five original Yahboom desktop launchers | RobotManager, JoystickControl, KeyboardControl, Mapping, Navigation — applications launched successfully |
+| YOLO11 Nano on ARM64 | PyTorch 2.5.1, Ultralytics 8.3.200; CPU inference on a test image detected one object |
+| YOLO + ROS 2 Python integration | Imports of `rclpy`, `cv_bridge`, ROS messages and custom interfaces succeeded |
+| MediaPipe 0.10.21 | Four CPU smoke tests passed; original Yahboom `hand_detector_node` processed synthetic ROS 2 images |
+| micro-ROS Agent | ARM64 compiled executable present; physical transport not yet validated |
+| ESP-IDF 5.1.2 / ESP32-S3 | Xtensa cross-toolchain installed; micro-ROS static library and documented firmware build workflow available |
+| Dify | Docker services started; deployment is experimental and may require user-specific initialization and credentials |
+
+**Scope of validation:** software startup, imports, selected builds, synthetic-image processing, and CPU inference. **End-to-end use with a real robot, camera, LiDAR, motor control, mapping and autonomous navigation has not yet been verified.** No native macOS GPU/Neural Engine acceleration is claimed: YOLO runs in the Ubuntu guest on CPU.
+
+## Documentation and updates
+
+- [Technical guide: YOLO on Ubuntu ARM64 under UTM](docs/YOLO_ARM64.md) — installation architecture, activation, tests, troubleshooting and limitations.
+- [Development repository on GitHub](https://github.com/jcarpio/Yahboom_MicroROS-V2-on-Apple-Silicon) — migration history and supporting material.
+- See **Latest Updates** below for ESP-IDF, micro-ROS and YOLO development notes.
+
+**Redistribution notice:** the VM contains multiple third-party projects and retains their respective licenses. Before public distribution, review included credentials, persistent Dify data, device identifiers, and Yahboom/vendor redistribution terms. A ZIP archive does not sanitize sensitive files or deleted QCOW2 disk blocks.
+
+---
+
+<!-- Keep the existing README table of contents and detailed chapters below this point. -->
 
 ## Table of contents
 
@@ -1251,7 +1289,7 @@ The repository now includes dedicated documentation covering the ESP32-S3 build 
 ### Bottom line
 
 **The architecture migration and a meaningful ROS 2–AI end-to-end software demonstration have succeeded.** The most important remaining work is *hardware validation, reproducibility on a fresh Mac/UTM installation, software packaging and responsible redistribution*. For a newcomer who wants to learn ROS 2 and work with Yahboom source on Apple Silicon, the present VM already provides a credible experimental starting point—provided the limitations above are clearly understood.
-
+<!-- 
 ## 20. Information needed to finalize a public release
 
 Please confirm the following before the document or VM is advertised as a reproducible download:
@@ -1267,7 +1305,7 @@ Please confirm the following before the document or VM is advertised as a reprod
 9. **Distribution policy:** preferred repository license for *original material*, maintainer contact, supported UTM/macOS versions and release-update policy.
 
 Missing answers do **not** invalidate the observed success; they distinguish a useful engineering report from a confidently reproducible public release.
-
+-->
 ## 21. Resources and acknowledgments
 
 - [UTM — macOS virtualization](https://mac.getutm.app/)
