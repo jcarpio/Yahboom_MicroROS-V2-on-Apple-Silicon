@@ -946,6 +946,294 @@ Two independent builds of the `publisher` firmware produced identical executable
 
 The final firmware images differed by only **37 bytes**, consistent with build-time metadata, the ELF hash, and the ESP32 image checksum.
 
+# Updates
+
+## 2026-10-13 — Native YOLO support for Apple Silicon (ARM64)
+
+### Overview
+
+This update documents the successful migration of the Yahboom MicroROS V2 YOLO environment from an original Ubuntu x86_64 VMware installation to Ubuntu 22.04 ARM64 running under UTM on Apple Silicon.
+
+The objective was to preserve compatibility with the Yahboom ROS 2 Humble environment while enabling YOLO inference using native ARM64 Python packages.
+
+**Status: Successfully tested — YOLO inference and ROS 2 Python integration working on ARM64.**
+
+### 1. Background
+
+The original Yahboom MicroROS V2 environment was designed for an x86_64 Linux system.
+
+During migration to Apple Silicon, we discovered that its existing YOLO Python virtual environment contained architecture-specific native libraries and compiled Python extensions.
+
+These binaries were not compatible with Ubuntu ARM64.
+
+Simply copying the original Python virtual environment was therefore insufficient.
+
+The solution was to create a new native ARM64 environment, install compatible versions of the required packages, and adapt the original Yahboom launcher configuration.
+
+### 2. System configuration
+
+| Component | Version / configuration |
+|---|---|
+| Host computer | Apple Silicon Mac |
+| Virtualization | UTM |
+| Guest operating system | Ubuntu 22.04 ARM64 |
+| CPU architecture | aarch64 |
+| ROS distribution | ROS 2 Humble |
+| PyTorch | 2.5.1 |
+| Torchvision | 0.20.1 |
+| Ultralytics | 8.3.200 |
+| OpenCV | 4.10.0 |
+| NumPy | 1.26.4 |
+| Pillow | 11.3.0 |
+| ONNX Runtime | 1.23.2 |
+| Inference device | CPU |
+
+The environment uses ARM64-compatible dependencies rather than emulating x86_64 Python binaries.
+
+### 3. Native YOLO environment
+
+A dedicated Python virtual environment was created:
+
+`/home/yahboom/yolo_arm64_env`
+
+The original Yahboom workspace remains at:
+
+`/home/yahboom/microros_ws`
+
+The adapted YOLO activation script is located at:
+
+`/home/yahboom/microros_ws/src/scripts/yolo_env.sh`
+
+It was updated to activate the new ARM64 virtual environment instead of the original x86_64 environment.
+
+The original script was retained as:
+
+`yolo_env.sh.original`
+
+### 4. How to activate YOLO
+
+Open a terminal inside Ubuntu ARM64 and run:
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/microros_ws/install/setup.bash
+source ~/microros_ws/src/scripts/yolo_env.sh
+```
+
+Verify the environment:
+
+```bash
+python -c "import torch, ultralytics; print('YOLO ARM64: OK')"
+```
+
+Check the installed PyTorch version and architecture:
+
+```bash
+python -c "import platform, torch; print(platform.machine()); print(torch.__version__)"
+```
+
+Expected architecture:
+
+```text
+aarch64
+```
+
+### 5. YOLO inference test
+
+A functional inference test was performed using the YOLO11 Nano model included in the migrated environment.
+
+Model:
+
+`/home/yahboom/MODELS/yolo/yolo11n.pt`
+
+Example test:
+
+```python
+from ultralytics import YOLO
+
+model = YOLO(
+    "/home/yahboom/MODELS/yolo/yolo11n.pt"
+)
+
+results = model.predict(
+    "/home/yahboom/Pictures/yahboom (1).jpg",
+    imgsz=320,
+    device="cpu",
+    verbose=False,
+    save=False
+)
+
+print("YOLO inference: OK")
+print("Detections:", len(results[0].boxes))
+```
+
+**Verified result:**
+
+```text
+YOLO inference: OK
+Detections: 1
+```
+
+This confirms that the YOLO model can load and perform inference successfully in the Ubuntu ARM64 environment.
+
+### 6. ROS 2 integration test
+
+Compatibility with the Yahboom ROS 2 environment was also tested.
+
+The following modules were imported successfully after activating the ROS 2 workspace and the native YOLO environment:
+
+- `torch`
+- `ultralytics`
+- `rclpy`
+- `cv_bridge`
+- `sensor_msgs`
+- `message_filters`
+- `interfaces.srv`
+
+Example:
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/microros_ws/install/setup.bash
+source ~/microros_ws/src/scripts/yolo_env.sh
+
+python -c "
+import torch
+import ultralytics
+import rclpy
+import cv_bridge
+from sensor_msgs.msg import Image
+import message_filters
+import interfaces.srv
+print('YOLO + ROS 2 ARM64: OK')
+"
+```
+
+Verified result:
+
+```text
+YOLO + ROS 2 ARM64: OK
+```
+
+This confirms that the required Python libraries can coexist and be imported in the migrated environment.
+
+It does not, by itself, demonstrate successful end-to-end operation of every Yahboom YOLO ROS node.
+
+### 7. Additional validation
+
+The following checks were completed:
+
+| Test | Result |
+|---|---|
+| Native ARM64 PyTorch import | Passed |
+| Ultralytics import | Passed |
+| YOLO11n model loading | Passed |
+| YOLO11n CPU inference | Passed |
+| Object detection on test image | Passed |
+| ROS 2 Humble environment activation | Passed |
+| ROS 2 Python module imports | Passed |
+| `cv_bridge` integration imports | Passed |
+| Python dependency consistency (`pip check`) | Passed |
+
+### 8. Removal of obsolete x86_64 environments
+
+After successfully testing the new ARM64 environment, the obsolete Python virtual environments copied from VMware were removed.
+
+Removed:
+
+```text
+~/microros_ws/python_env/yolo_env/.venv
+~/microros_ws/python_env/mircoros_v2_env/.venv_x86_backup
+```
+
+These environments were specific to the original x86_64 installation and were not required for the ARM64 setup.
+
+Approximately 6 GB of disk space was recovered.
+
+The new native YOLO environment occupies approximately 1.2 GB.
+
+### 9. Known limitations
+
+- YOLO inference has been verified using CPU execution.
+- No Apple Neural Engine acceleration has been validated inside the Ubuntu virtual machine.
+- GPU passthrough or CUDA acceleration is not part of the verified configuration.
+- Complete YOLO ROS node operation with the physical Yahboom robot and camera has not yet been verified.
+- Real-time performance depends on the Mac hardware, UTM configuration, image resolution and selected YOLO model.
+- Paths assume the default Ubuntu username `yahboom`.
+
+For initial testing, YOLO11 Nano (`yolo11n.pt`) and an image size of 320 pixels are recommended.
+
+### 10. Troubleshooting
+
+**Problem: `ModuleNotFoundError: ultralytics`**
+
+Activate the correct environment:
+
+```bash
+source ~/microros_ws/src/scripts/yolo_env.sh
+```
+
+**Problem: `ModuleNotFoundError: rclpy`**
+
+Load ROS 2 Humble before activating the YOLO environment:
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/microros_ws/install/setup.bash
+source ~/microros_ws/src/scripts/yolo_env.sh
+```
+
+**Problem: incorrect architecture**
+
+Check:
+
+```bash
+uname -m
+```
+
+The expected result is `aarch64`.
+
+Do not reuse binary Python virtual environments created on x86_64 Linux.
+
+**Problem: YOLO runs slowly**
+
+Use the Nano model and reduce inference image size:
+
+```python
+results = model.predict(
+    image,
+    imgsz=320,
+    device="cpu"
+)
+```
+
+### 11. Future work
+
+Potential improvements include:
+
+- Testing complete YOLO detection pipelines with the physical Yahboom robot.
+- Validating real-time image acquisition from ROS 2 camera topics.
+- Measuring inference latency and frames per second.
+- Comparing YOLO11n with smaller or optimized models.
+- Exploring ONNX Runtime optimization on ARM64.
+- Documenting ROS 2 topic interfaces for robot vision applications.
+
+### 12. Project links
+
+**UTM ARM64 virtual machine:**
+
+https://huggingface.co/datasets/enkire/Yahboom-MicroROS-V2-Ubuntu-22.04-ARM64-UTM
+
+**GitHub project:**
+
+https://github.com/jcarpio/Yahboom_MicroROS-V2-on-Apple-Silicon
+
+---
+
+This is an independent community adaptation intended to support the use of Yahboom MicroROS V2 with Apple Silicon computers.
+
+Yahboom and all third-party software retain their respective copyrights and licenses.
+
 ### Additional restored resources
 
 The environment also includes restored Yahboom ESP-IDF examples, micro-ROS sample projects, original robot configuration utilities, and recovered AI model resources. ONNX Runtime CPU inference was successfully tested on ARM64 using selected YOLO and tracking models.
