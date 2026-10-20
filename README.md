@@ -38,6 +38,7 @@ When the upload is complete, download the exported VM archive, verify its checks
 - See **Latest Updates** below for ESP-IDF, micro-ROS and YOLO development notes.
 - [Mac/UTM ARM64 Setup Guide](docs/YAHBOOM_MICROROS_V2_MAC_UTM_ARM64_SETUP.md) - USB passthrough, Wi-Fi networking, ROS 2 Humble,
 micro-ROS Agent, camera integration, and LiDAR visualization.
+- [Dify, Ollama, Joystick & LLM Integration Guide](docs/YAHBOOM_MICROROS_V2_DIFY_OLLAMA_JOYSTICK_LLM_PROGRESS_2026-10-20.md) — local LLM integration on Apple Silicon, Dify configuration, wireless joystick control, ESP32 camera streaming, ROS 2 motion commands, troubleshooting, and safety considerations.
 
 **Redistribution notice:** the VM contains multiple third-party projects and retains their respective licenses. Before public distribution, review included credentials, persistent Dify data, device identifiers, and Yahboom/vendor redistribution terms. A ZIP archive does not sanitize sensitive files or deleted QCOW2 disk blocks.
 
