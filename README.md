@@ -36,6 +36,8 @@ When the upload is complete, download the exported VM archive, verify its checks
 - [Technical guide: YOLO on Ubuntu ARM64 under UTM](docs/YOLO_ARM64.md) — installation architecture, activation, tests, troubleshooting and limitations.
 - [Development repository on GitHub](https://github.com/jcarpio/Yahboom_MicroROS-V2-on-Apple-Silicon) — migration history and supporting material.
 - See **Latest Updates** below for ESP-IDF, micro-ROS and YOLO development notes.
+- [Mac/UTM ARM64 Setup Guide](docs/YAHBOOM_MICROROS_V2_MAC_UTM_ARM64_SETUP.md) - USB passthrough, Wi-Fi networking, ROS 2 Humble,
+micro-ROS Agent, camera integration, and LiDAR visualization.
 
 **Redistribution notice:** the VM contains multiple third-party projects and retains their respective licenses. Before public distribution, review included credentials, persistent Dify data, device identifiers, and Yahboom/vendor redistribution terms. A ZIP archive does not sanitize sensitive files or deleted QCOW2 disk blocks.
 
